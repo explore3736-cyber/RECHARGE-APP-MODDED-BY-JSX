@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RECHARGE SUPREME - JSX MODS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #fff; margin: 0; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        .google-font { font-family: 'Google Sans', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* JSX MOD PANEL */
+        #jsxWidget { 
+            position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; 
+            background: #000; border-radius: 50%; z-index: 10000; 
+            display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); cursor: pointer; color: white;
+            font-weight: 900; font-size: 12px; border: 2px solid #3b82f6;
+        }
+
+        #jsxPanel { 
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-width: 350px; background: #0a0a0a; 
+            border-radius: 24px; z-index: 11000; padding: 24px; color: white; 
+            display: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.7), 0 40px 80px rgba(0,0,0,0.6);
+            border: 1px solid #1f1f1f;
+        }
+
+        /* SCREENS */
+        .screen { position: absolute; inset: 0; background: #fff; display: none; flex-direction: column; z-index: 10; }
+        .screen.active { display: flex; }
+
+        /* UI ELEMENTS */
+        .op-card { border: 2px solid #f3f4f6; border-radius: 20px; padding: 16px; transition: 0.2s; cursor: pointer; }
+        .op-card.selected { border-color: #000; background: #f9fafb; transform: scale(0.98); }
+        
+        .plan-card { border: 1.5px solid #f3f4f6; border-radius: 24px; padding: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
+        .plan-card:active { background: #f9fafb; transform: scale(0.97); }
+
+        .pay-item { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1.5px solid #f3f4f6; border-radius: 20px; margin-bottom: 12px; cursor: pointer; }
+        .pay-item.selected { border-color: #673ab7; background: #f5f3ff; }
+
+        /* SMS STYLING */
+        .sms-bubble { background: #e8f0fe; color: #1f1f20; border-radius: 20px; padding: 14px 18px; max-width: 85%; font-size: 14px; margin-top: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+        /* NOTIFICATION */
+        .notif-banner { 
+            position: fixed; top: -120px; left: 12px; right: 12px; background: #fff; 
+            border-radius: 24px; padding: 16px; z-index: 50000; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05); 
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        .notif-banner.active { top: 12px; }
+
+        /* LOADER */
+        .loader-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 60000; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .spin { width: 35px; height: 35px; border: 3px solid #eee; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- NOTIFICATION PILL -->
+    <div id="notif" class="notif-banner flex items-center gap-4" onclick="openSms()">
+        <div class="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-lg">
+            <i class="fas fa-comment"></i>
+        </div>
+        <div class="flex-1 overflow-hidden">
+            <div class="flex justify-between items-center"><span class="text-[10px] font-black text-blue-600 tracking-tighter">MESSAGES</span><span class="text-[10px] text-gray-400">now</span></div>
+            <p class="text-sm font-bold text-gray-800" id="notifSender">JIOPAY</p>
+            <p class="text-xs text-gray-500 truncate">Recharge successful! Click to view details.</p>
+        </div>
+    </div>
+
+    <!-- MOD WIDGET -->
+    <div id="jsxWidget" onclick="toggleJsx(true)">JSX</div>
+    
+    <!-- MOD PANEL -->
+    <div id="jsxPanel">
+        <div class="text-center mb-6">
+            <p class="mono text-[10px] text-blue-500 font-bold tracking-widest uppercase">Modded By JSX</p>
+            <p class="mono text-[9px] text-zinc-500 mt-0.5">Ig- @jsxmods</p>
+        </div>
+        <div class="flex justify-between items-center mb-6 pb-2 border-b border-zinc-800">
+            <h4 class="text-[10px] font-black text-white tracking-widest uppercase">Bypass Engine</h4>
+            <i class="fas fa-times text-zinc-500" onclick="toggleJsx(false)"></i>
+        </div>
+        <div class="flex justify-between items-center bg-zinc-900 p-5 rounded-3xl">
+            <div>
+                <p class="text-xs font-bold text-white">PAYMENT BYPASS</p>
+                <p class="text-[8px] text-zinc-500 uppercase mt-1">Status: Unlocked</p>
+            </div>
+            <div class="w-12 h-6 bg-zinc-800 rounded-full relative cursor-pointer" onclick="toggleBypass()">
+                <div id="bypassKnob" class="absolute top-1 left-1 w-4 h-4 bg-zinc-600 rounded-full transition-all"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loader-overlay" id="loader">
+        <div class="spin"></div>
+        <p class="mt-6 font-bold text-[10px] tracking-widest text-zinc-500 uppercase">Verifying Transaction</p>
+    </div>
+
+    <!-- SCREEN 1: HOME -->
+    <div class="screen active" id="home">
+        <div class="p-8 pt-16 flex-1 overflow-y-auto">
+            <h1 class="text-4xl font-black google-font tracking-tighter mb-8">Recharge<br>Mobile</h1>
+            
+            <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100 mb-8">
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Mobile Number</p>
+                <div class="flex items-center gap-3">
+                    <span class="text-xl font-black text-gray-300">+91</span>
+                    <input id="phone" type="tel" maxlength="10" placeholder="Enter 10 digits" class="w-full bg-transparent text-xl font-black outline-none placeholder:text-gray-200">
+                </div>
+            </div>
+
+            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Select Operator</p>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="op-card flex flex-col items-center" onclick="setOp('Airtel', this)">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpEA4wEm3Jyj1eZ4eXSwRT-Kv8AuWzBmyQH9vbIr5KkA&s=10" class="h-10 mb-2 object-contain">
+                    <span class="text-[11px] font-bold">Airtel</span>
+                </div>
+                <div class="op-card flex flex-col items-center" onclick="setOp('Jio', this)">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKhYl7RMn6aoQL0pJOYc3kduEDmIC37txjK_uNfM4G0g&s" class="h-10 mb-2 object-contain">
+                    <span class="text-[11px] font-bold">Jio</span>
+                </div>
+                <div class="op-card flex flex-col items-center" onclick="setOp('Vi', this)">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIIp3J_m3rTmk7lKU6iNwepn3NU6aWDElRBe0r_-rqZA&s=10" class="h-10 mb-2 object-contain">
+                    <span class="text-[11px] font-bold">Vi</span>
+                </div>
+                <div class="op-card flex flex-col items-center" onclick="setOp('BSNL', this)">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGtzjrIflLtw_St6jT4D_QwRuoP9syop2yqH8FlmlLDAmFehyjJ_HxOk-Q&s=10" class="h-10 mb-2 object-contain">
+                    <span class="text-[11px] font-bold">BSNL</span>
+                </div>
+            </div>
+        </div>
+        <div class="p-8">
+            <button onclick="navPlans()" class="w-full bg-black text-white py-5 rounded-full font-black text-[11px] uppercase tracking-widest shadow-xl">Browse Plans</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: PLANS -->
+    <div class="screen bg-gray-50" id="plans">
+        <div class="bg-white p-6 pt-12 border-b flex items-center gap-4">
+            <i class="fas fa-arrow-left text-xl cursor-pointer" onclick="show('home')"></i>
+            <h2 class="font-black google-font">Unlimited Plans</h2>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4" id="planList"></div>
+    </div>
+
+    <!-- SCREEN 3: PAYMENT -->
+    <div class="screen" id="payScreen">
+        <div class="p-6 pt-12 border-b flex items-center gap-4">
+            <i class="fas fa-arrow-left text-xl cursor-pointer" onclick="show('plans')"></i>
+            <h2 class="font-black google-font">Secure Pay</h2>
+        </div>
+        <div class="p-8 flex-1 overflow-y-auto">
+            <div class="text-center mb-10">
+                <p class="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-1">Payment Amount</p>
+                <h1 class="text-5xl font-black google-font" id="payAmt">₹0</h1>
+            </div>
+
+            <div class="space-y-3">
+                <div class="pay-item selected" onclick="selPay(this)">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnrx40iOYx_VsUKnW56dOaxcsb2aZXWnopIjFl5HHsXIjw62pbHdu9OtA&s=10" class="w-8">
+                    <div class="flex-1"><p class="font-bold text-sm">PhonePe</p></div>
+                    <div class="w-5 h-5 border-2 border-indigo-600 rounded-full flex items-center justify-center"><div class="w-2.5 h-2.5 bg-indigo-600 rounded-full"></div></div>
+                </div>
+                <div class="pay-item" onclick="selPay(this)">
+                    <img src="https://cdn-icons-png.flaticon.com/512/825/825454.png" class="w-8">
+                    <div class="flex-1"><p class="font-bold text-sm">Paytm UPI</p></div>
+                    <div class="w-5 h-5 border-2 border-gray-200 rounded-full"></div>
+                </div>
+            </div>
+
+            <button onclick="processPay()" class="w-full bg-black text-white py-5 rounded-full font-black text-[11px] uppercase tracking-widest mt-12 shadow-2xl">Confirm Payment</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: SUCCESS -->
+    <div class="screen items-center justify-center p-8 text-center" id="success">
+        <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-3xl mb-6 shadow-xl shadow-green-100">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2 class="text-3xl font-black google-font mb-2">Payment Done</h2>
+        <p class="text-gray-400 font-bold text-sm mb-10">Recharge successful for <span class="text-black" id="succNum"></span></p>
+        
+        <div class="w-full bg-gray-50 border border-gray-100 rounded-3xl p-6 space-y-3">
+            <div class="flex justify-between text-[10px] font-black uppercase text-gray-400"><span>Operator</span><span class="text-black" id="succOp"></span></div>
+            <div class="flex justify-between text-[10px] font-black uppercase text-gray-400"><span>Amount</span><span class="text-black" id="succAmt"></span></div>
+        </div>
+
+        <button onclick="location.reload()" class="w-full bg-gray-100 py-5 rounded-full font-black text-[11px] uppercase mt-12">Return Home</button>
+    </div>
+
+    <!-- SCREEN 5: SMS APP -->
+    <div class="screen" id="smsScreen">
+        <div class="p-10 pb-5 border-b flex items-center gap-5">
+            <i class="fas fa-arrow-left text-gray-500 cursor-pointer" onclick="show('success')"></i>
+            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-black text-lg" id="smsInit">J</div>
+            <div class="flex-1">
+                <p class="font-black text-base" id="smsName">JIOPAY</p>
+                <p class="text-[9px] font-black text-green-500 uppercase tracking-widest">Verified Official</p>
+            </div>
+        </div>
+        <div class="flex-1 p-6 overflow-y-auto bg-white">
+            <p class="text-center text-[9px] font-black text-gray-300 uppercase mb-6 tracking-widest">Today</p>
+            <div class="sms-bubble" id="smsMsg"></div>
+        </div>
+        <div class="p-4 bg-gray-50 border-t">
+            <div class="bg-white border border-gray-200 rounded-full px-5 py-3 text-sm text-gray-400 flex justify-between items-center">
+                <span>Type message...</span>
+                <i class="fas fa-paper-plane text-blue-500"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let curOp = "", curPlan = null, isBypass = false;
+
+        const allPlans = {
+            'Airtel': [{p:3359, v:'365d', d:'2.5GB/d'},{p:839, v:'84d', d:'2GB/d'},{p:479, v:'56d', d:'1.5GB/d'},{p:299, v:'28d', d:'1.5GB/d'},{p:155, v:'24d', d:'1GB'},{p:19, v:'1d', d:'1GB'}],
+            'Jio': [{p:2999, v:'365d', d:'2.5GB/d'},{p:749, v:'90d', d:'2GB/d'},{p:349, v:'28d', d:'2GB/d'},{p:239, v:'28d', d:'1.5GB/d'},{p:155, v:'28d', d:'2GB'},{p:15, v:'1d', d:'1GB'}],
+            'Vi': [{p:3099, v:'365d', d:'2GB/d'},{p:719, v:'84d', d:'1.5GB/d'},{p:479, v:'56d', d:'1.5GB/d'},{p:299, v:'28d', d:'1.5GB/d'},{p:179, v:'28d', d:'2GB'},{p:19, v:'1d', d:'1GB'}],
+            'BSNL': [{p:2399, v:'395d', d:'2GB/d'},{p:599, v:'84d', d:'5GB/d'},{p:197, v:'70d', d:'2GB/d'},{p:153, v:'26d', d:'1GB/d'},{p:107, v:'35d', d:'3GB'},{p:18, v:'2d', d:'1GB'}]
+        };
+
+        function toggleJsx(s) { document.getElementById('jsxPanel').style.display = s ? 'block' : 'none'; }
+        
+        function toggleBypass() {
+            isBypass = !isBypass;
+            document.getElementById('bypassKnob').style.left = isBypass ? '26px' : '4px';
+            document.getElementById('bypassKnob').style.background = isBypass ? '#3b82f6' : '#52525b';
+        }
+
+        function show(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function setOp(op, el) {
+            curOp = op;
+            document.querySelectorAll('.op-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function navPlans() {
+            const num = document.getElementById('phone').value;
+            if(!curOp || num.length < 10) return;
+            const list = document.getElementById('planList');
+            list.innerHTML = "";
+            allPlans[curOp].forEach(p => {
+                const div = document.createElement('div');
+                div.className = "plan-card flex justify-between items-center bg-white";
+                div.onclick = () => { curPlan = p; document.getElementById('payAmt').innerText = "₹"+p.p; show('payScreen'); };
+                div.innerHTML = `
+                    <div>
+                        <p class="text-2xl font-black mb-1">₹${p.p}</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${p.d} • Validity: ${p.v}</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-200"></i>
+                `;
+                list.appendChild(div);
+            });
+            show('plans');
+        }
+
+        function selPay(el) {
+            document.querySelectorAll('.pay-item').forEach(i => {
+                i.classList.remove('selected');
+                i.querySelector('.w-5').innerHTML = "";
+                i.querySelector('.w-5').className = "w-5 h-5 border-2 border-gray-200 rounded-full";
+            });
+            el.classList.add('selected');
+            el.querySelector('.w-5').className = "w-5 h-5 border-2 border-indigo-600 rounded-full flex items-center justify-center";
+            el.querySelector('.w-5').innerHTML = '<div class="w-2.5 h-2.5 bg-indigo-600 rounded-full"></div>';
+        }
+
+        function processPay() {
+            if(!isBypass) {
+                alert("Please enable 'Payment Bypass' in the JSX Mod Menu (Click the black JSX button)");
+                return;
+            }
+            document.getElementById('loader').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                const num = document.getElementById('phone').value;
+                document.getElementById('succAmt').innerText = "₹" + curPlan.p;
+                document.getElementById('succNum').innerText = "+91 " + num;
+                document.getElementById('succOp').innerText = curOp;
+                
+                const names = {'Airtel':'AIRTEL','Jio':'JIOPAY','Vi':'VIFONE','BSNL':'BSNL-REC'};
+                const sender = names[curOp];
+                document.getElementById('notifSender').innerText = sender;
+                document.getElementById('smsName').innerText = sender;
+                document.getElementById('smsInit').innerText = sender[0];
+                document.getElementById('smsMsg').innerText = `Recharge successful! ₹${curPlan.p} has been credited to your ${curOp} mobile ${num}. Your data benefit is ${curPlan.d} for ${curPlan.v}. Ref No: JSX${Math.floor(Math.random()*999999)}`;
+                
+                show('success');
+                setTimeout(() => {
+                    playPupSound();
+                    document.getElementById('notif').classList.add('active');
+                }, 1000);
+            }, 3000);
+        }
+
+        function playPupSound() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const tone = (f, d, t) => {
+                const o = ctx.createOscillator(); const g = ctx.createGain();
+                o.connect(g); g.connect(ctx.destination);
+                o.frequency.setValueAtTime(f, ctx.currentTime + t);
+                g.gain.setValueAtTime(0.2, ctx.currentTime + t);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + d);
+                o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + d);
+            };
+            tone(1500, 0.08, 0); // High pitch "Pup"
+            if(navigator.vibrate) navigator.vibrate(60);
+        }
+
+        function openSms() {
+            document.getElementById('notif').classList.remove('active');
+            show('smsScreen');
+        }
+    </script>
+</body>
+</html>
+
